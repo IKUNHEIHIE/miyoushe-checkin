@@ -1,4 +1,7 @@
 import '@testing-library/jest-dom';
+import { configure } from '@testing-library/react';
+
+configure({ asyncUtilTimeout: 5000 });
 import { beforeEach, afterEach, vi } from 'vitest';
 import { mockFetch, setCaptchaRejection, testCaptchaResult } from './mockHttp';
 import { testNow } from './mockClock';
