@@ -7,6 +7,7 @@ import { useApp } from '../context/AppContext';
 export const SetupPage: React.FC = () => {
   const navigate = useNavigate();
   const {
+    contractVersion,
     setInitializedState,
     pushToast
   } = useApp();
@@ -83,7 +84,7 @@ export const SetupPage: React.FC = () => {
         <div className="auth-card-header">
           <div className="eyebrow-row">
             <span className="badge badge-cobalt">首次部署初始化 · 单管理员实例</span>
-            <span className="badge badge-slate">契约 v0.1.0</span>
+            <span className="badge badge-slate">契约 v{contractVersion ?? '…'}</span>
           </div>
           <h1 className="auth-title">初始化自托管签到面板</h1>
           <p className="auth-subtitle">

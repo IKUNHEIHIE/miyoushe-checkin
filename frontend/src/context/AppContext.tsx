@@ -29,6 +29,7 @@ export interface QueuedChallenge {
 
 interface AppContextValue {
   initialized: boolean | null;
+  contractVersion: string | null;
   session: Session | null;
   capabilities: Capabilities | null;
   bootstrapping: boolean;
@@ -68,6 +69,7 @@ export const FLOW_SESSION_STORAGE_KEY = 'mys_active_login_flow_id';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [initialized, setInitialized] = useState<boolean | null>(null);
+  const [contractVersion, setContractVersion] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
   const [bootstrapping, setBootstrapping] = useState<boolean>(true);
@@ -129,6 +131,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const setupRes = await apiClient.getSetupStatus();
       setInitialized(setupRes.data.initialized);
+      setContractVersion(setupRes.data.contractVersion);
       if (!setupRes.data.initialized) {
         setSession(null);
         setCapabilities(null);
@@ -282,6 +285,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         initialized,
+        contractVersion,
         session,
         capabilities,
         bootstrapping,

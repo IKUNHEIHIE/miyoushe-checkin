@@ -24,6 +24,7 @@ export const Layout: React.FC = () => {
     session,
     setSessionData,
     capabilities,
+    contractVersion,
     toasts,
     dismissToast,
     openAddAccount,
@@ -123,7 +124,7 @@ export const Layout: React.FC = () => {
         </nav>
 
         <div className="sidebar-capability-card">
-          <div className="cap-header">实例能力边界 (v{capabilities?.contractVersion ?? '0.1.0'})</div>
+          <div className="cap-header">实例能力边界 (v{capabilities?.contractVersion ?? contractVersion ?? '…'})</div>
           <ul className="cap-list">
             <li>
               <span>根凭据长期续期：</span>

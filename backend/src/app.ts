@@ -21,10 +21,11 @@ import type { GameUpstream } from './games.js';
 import type { FastifyRequest } from 'fastify';
 
 type Schema = Record<string, any>;
-type Contract = { components: { schemas: Record<string, Schema>; parameters: Record<string, Schema> }; paths: Record<string, Record<string, Schema>> };
+type Contract = { info: { version: string }; components: { schemas: Record<string, Schema>; parameters: Record<string, Schema> }; paths: Record<string, Record<string, Schema>> };
 const contractPath = [resolve(import.meta.dirname, '../../docs/openapi.json'), resolve(import.meta.dirname, '../../../docs/openapi.json')].find(existsSync);
 if (!contractPath) throw Error('Shared docs/openapi.json is required');
 const contract = JSON.parse(readFileSync(contractPath, 'utf8')) as Contract;
+export const contractVersion = contract.info.version;
 function rewrite(value: any): any {
   if (Array.isArray(value)) return value.map(rewrite);
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).filter(([k]) => !['discriminator', 'example', 'writeOnly', 'readOnly'].includes(k)).map(([k, v]) => [k, k === '$ref' && typeof v === 'string' ? v.replace('#/components/schemas/', '') + '#' : rewrite(v)]));
@@ -85,7 +86,7 @@ export async function buildApp(config: Config, options: { upstream?: Upstream; g
   type Context = { request: FastifyRequest; params: Record<string, string>; query: any; body: any };
   const methods: Record<string, (c: Context) => unknown | Promise<unknown>> = {
     getHealth: () => ({ status: 'ok', version: '0.2.0', database: 'ok', serverTime: iso() }),
-    getSetupStatus: () => ({ initialized: !!store.db.prepare('SELECT id FROM administrators LIMIT 1').get(), contractVersion: '0.1.0' }),
+    getSetupStatus: () => ({ initialized: !!store.db.prepare('SELECT id FROM administrators LIMIT 1').get(), contractVersion }),
     initializeAdmin: async ({ request, body }) => {
       store.limit('setup:' + request.ip, 5, 60000);
       if (!constantEqual(String(request.headers['x-setup-token'] ?? ''), config.bootstrapToken)) throw new Fault(403, 'SETUP_TOKEN_INVALID', '初始化 token 无效');
