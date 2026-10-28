@@ -1,0 +1,5015 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "米游社自托管签到面板 API",
+    "version": "0.2.0",
+    "description": "v0.2新增游戏签到福利与角色管理。原神、星穹铁道、绝区零单账号真实签到及状态复核通过；其他游戏与渠道实测范围见game-checkin.md。面向自托管单管理员实例。HTTP API 不暴露米哈游凭据。所有 examples 为虚构数据。"
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "同域生产及前端代理入口"
+    }
+  ],
+  "security": [
+    {
+      "sessionCookie": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "System"
+    },
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Accounts"
+    },
+    {
+      "name": "LoginFlows"
+    },
+    {
+      "name": "Challenges"
+    },
+    {
+      "name": "Credentials"
+    },
+    {
+      "name": "Missions"
+    },
+    {
+      "name": "Schedules"
+    },
+    {
+      "name": "Runs"
+    },
+    {
+      "name": "Notifications"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "getHealth",
+        "summary": "健康检查",
+        "description": "健康检查",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setup/status": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "getSetupStatus",
+        "summary": "查询是否已初始化",
+        "description": "查询是否已初始化",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatusResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setup": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "initializeAdmin",
+        "summary": "首次初始化管理员",
+        "description": "仅未初始化时接受；token 来自部署环境，不写入前端构建产物。已初始化返回409 ALREADY_INITIALIZED；初始化不自动登录。",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Setup-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "已创建。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "loginAdmin",
+        "summary": "管理员登录",
+        "description": "设置 mys_session Cookie 并返回 CSRF token。用户名或密码错误统一401 AUTH_INVALID。",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "getAdminSession",
+        "summary": "获取当前管理员及 CSRF token",
+        "description": "获取当前管理员及 CSRF token",
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "logoutAdmin",
+        "summary": "撤销当前面板会话",
+        "description": "撤销当前面板会话",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "getDashboard",
+        "summary": "获取概览",
+        "description": "获取概览",
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/capabilities": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "getCapabilities",
+        "summary": "获取能力目录与验证程度",
+        "description": "获取能力目录与验证程度",
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapabilitiesResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "listAccounts",
+        "summary": "分页查询账号",
+        "description": "分页查询账号",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "unknown",
+                "active",
+                "reauth_required",
+                "verification_required"
+              ]
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "getAccount",
+        "summary": "获取账号详情",
+        "description": "获取账号详情",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "updateAccount",
+        "summary": "更新账号备注与任务偏好",
+        "description": "version 必须匹配；不允许修改 aid 或直接设置凭据。不可执行能力返回422 CAPABILITY_UNAVAILABLE。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "deleteAccount",
+        "summary": "删除本地账号配置与凭据",
+        "description": "有活动 run 或凭据操作时409 ACCOUNT_BUSY。只删除本地管理数据，不删除官方账号；前端必须二次确认。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login-flows": {
+      "post": {
+        "tags": [
+          "LoginFlows"
+        ],
+        "operationId": "createLoginFlow",
+        "summary": "创建短信登录流程",
+        "description": "创建不自动发送短信。普通添加重复 aid 在最终绑定时409 ACCOUNT_EXISTS；targetAccountId 为重新登录，必须验证 aid 一致。",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFlowRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "已创建。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginFlowResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login-flows/{flowId}": {
+      "get": {
+        "tags": [
+          "LoginFlows"
+        ],
+        "operationId": "getLoginFlow",
+        "summary": "查询短信登录进度",
+        "description": "本系统流程过期返回410 FLOW_EXPIRED；进程重启后原流程也使用该错误。",
+        "parameters": [
+          {
+            "name": "flowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginFlowResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "LoginFlows"
+        ],
+        "operationId": "cancelLoginFlow",
+        "summary": "取消短信登录流程",
+        "description": "取消短信登录流程",
+        "parameters": [
+          {
+            "name": "flowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginFlowResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login-flows/{flowId}/send-sms": {
+      "post": {
+        "tags": [
+          "LoginFlows"
+        ],
+        "operationId": "sendLoginSms",
+        "summary": "发送或重新发送短信",
+        "description": "created 或 awaiting_sms_code 且超过 resendAfter 才允许。可能返回 awaiting_captcha；必须按 state 判断，HTTP 200 不表示短信已发送。超时可能返回502 UPSTREAM_OUTCOME_UNKNOWN，不自动重发。",
+        "parameters": [
+          {
+            "name": "flowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginFlowResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login-flows/{flowId}/submit-code": {
+      "post": {
+        "tags": [
+          "LoginFlows"
+        ],
+        "operationId": "submitLoginCode",
+        "summary": "提交短信验证码",
+        "description": "保留字符串前导零。可能返回 awaiting_captcha、exchanging 或 completed；验证码错误422 SMS_CODE_INVALID，终态冲突409。",
+        "parameters": [
+          {
+            "name": "flowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "已受理；轮询返回资源。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginFlowResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/challenges/{challengeId}": {
+      "get": {
+        "tags": [
+          "Challenges"
+        ],
+        "operationId": "getChallenge",
+        "summary": "获取当前人工验证配置",
+        "description": "获取当前人工验证配置",
+        "parameters": [
+          {
+            "name": "challengeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/challenges/{challengeId}/submit": {
+      "post": {
+        "tags": [
+          "Challenges"
+        ],
+        "operationId": "submitChallenge",
+        "summary": "提交用户手动完成的官方验证结果",
+        "description": "只接受 SDK 返回字段。版本必须匹配 Challenge。后端绑定官方 session 并恢复原动作；返回后轮询 owner。校验失败422 CHALLENGE_FAILED，过期410 CHALLENGE_EXPIRED；原结果不能复用到新会话。",
+        "parameters": [
+          {
+            "name": "challengeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChallengeSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeReceiptResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/challenges/{challengeId}/renew": {
+      "post": {
+        "tags": [
+          "Challenges"
+        ],
+        "operationId": "renewChallenge",
+        "summary": "由用户主动更新人工验证会话",
+        "description": "产生新的 challengeId；原会话失效。只准备新的待验证会话；不自动解题。允许 pending/failed/expired，owner 必须仍可继续；受短信冷却与限流约束。",
+        "parameters": [
+          {
+            "name": "challengeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/credential-operations": {
+      "post": {
+        "tags": [
+          "Credentials"
+        ],
+        "operationId": "startCredentialOperation",
+        "summary": "检查凭据或重新获取工作 Cookie",
+        "description": "check 不延长有效期；refresh_cookie 不承诺根凭据续期。同账号其他活动操作可返回409 ACCOUNT_BUSY；可能等待人工验证。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialOperationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "已受理；轮询返回资源。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialOperationResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credential-operations/{operationId}": {
+      "get": {
+        "tags": [
+          "Credentials"
+        ],
+        "operationId": "getCredentialOperation",
+        "summary": "获取凭据操作状态",
+        "description": "获取凭据操作状态",
+        "parameters": [
+          {
+            "name": "operationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialOperationResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/missions": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "operationId": "getAccountMissions",
+        "summary": "获取最近的米游币任务快照",
+        "description": "只返回缓存；首次无快照时 fetchedAt=null、stale=true、余额字段=null、missions=[]。不自动请求上游。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MissionSnapshotResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/missions/refresh": {
+      "post": {
+        "tags": [
+          "Missions"
+        ],
+        "operationId": "refreshAccountMissions",
+        "summary": "从官方重新查询任务快照",
+        "description": "只查询，不执行签到或领取。使用当前工作 Cookie；凭据失效409 ACCOUNT_REAUTH_REQUIRED，用户可启动凭据检查/更新。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MissionSnapshotResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/schedule": {
+      "get": {
+        "tags": [
+          "Schedules"
+        ],
+        "operationId": "getAccountSchedule",
+        "summary": "获取账号每日计划",
+        "description": "获取账号每日计划",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Schedules"
+        ],
+        "operationId": "updateAccountSchedule",
+        "summary": "更新账号每日计划",
+        "description": "创建账号时默认计划关闭。version 乐观锁；固定 Asia/Shanghai，0–10 分钟错峰；account.enabled=false 或全局暂停时 nextRunAt=null。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/runs": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "operationId": "createAccountRun",
+        "summary": "立即执行选定社区任务",
+        "description": "逐项验证能力与显式启用偏好。按当前上海日期去重；已有同范围任务时返回已有 run。未知结果不自动重放。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "已受理；轮询返回资源。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "operationId": "listRuns",
+        "summary": "分页查询执行记录",
+        "description": "分页查询执行记录",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/RunState"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{runId}": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "operationId": "getRun",
+        "summary": "查询执行详情",
+        "description": "查询执行详情",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{runId}/events": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "operationId": "listRunEvents",
+        "summary": "分页查询脱敏执行日志",
+        "description": "分页查询脱敏执行日志",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunEventPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{runId}/retry": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "operationId": "retryRun",
+        "summary": "重试可安全恢复的失败步骤",
+        "description": "只允许 failed/partially_succeeded/outcome_unknown；先对账，跳过已确认成功步骤，不盲目重复未知写入。创建新 run，parentRunId 指向原 run；跨日返回409 RUN_STATE_CONFLICT，由用户发起今日任务。",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "已受理；轮询返回资源。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{runId}/cancel": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "operationId": "cancelRun",
+        "summary": "请求停止后续步骤",
+        "description": "queued/running/awaiting_verification 可请求取消；不能回滚已完成上游写入，当前请求须核对结束后才能进入终态。",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "已受理；轮询返回资源。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/system": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "getSystemSettings",
+        "summary": "获取调度及日志设置",
+        "description": "获取调度及日志设置",
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemSettingsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "updateSystemSettings",
+        "summary": "更新调度及日志设置",
+        "description": "更新调度及日志设置",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemSettingsPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemSettingsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/notifications": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "operationId": "getNotificationSettings",
+        "summary": "获取通知配置（不含密码）",
+        "description": "获取通知配置（不含密码）",
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Notifications"
+        ],
+        "operationId": "updateNotificationSettings",
+        "summary": "更新邮件通知配置",
+        "description": "version 乐观锁。smtpPassword 省略/null 均保留；非空字符串替换；clearPassword=true 明确清除；不得同时设置新密码与 clearPassword。enabled=true 时要求配置完整。",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSettingsPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/tests": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "operationId": "createNotificationTest",
+        "summary": "向配置的收件地址发送测试邮件",
+        "description": "仅向管理员已保存的 toAddress 发送；使用现有 SMTP 配置，单独限流。",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "已受理；轮询返回资源。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTestResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/tests/{testId}": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "operationId": "getNotificationTest",
+        "summary": "查询测试邮件结果",
+        "description": "查询测试邮件结果",
+        "parameters": [
+          {
+            "name": "testId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTestResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/game-roles": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "operationId": "getGameRoles",
+        "summary": "获取首页签到福利的游戏角色与签到快照",
+        "description": "只读缓存；不会执行签到。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameRolesSnapshotResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/game-roles/refresh": {
+      "post": {
+        "tags": [
+          "Missions"
+        ],
+        "operationId": "refreshGameRoles",
+        "summary": "从官方刷新游戏角色和签到福利状态",
+        "description": "逐角色查询，包含游戏内奖励；只查询，不签到。",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Csrf"
+          },
+          {
+            "$ref": "#/components/parameters/Idempotency"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameRolesSnapshotResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "错误；HTTP 与 error.code 对照见前端交接说明。",
+            "headers": {
+              "Retry-After": {
+                "description": "429 时返回秒数；以此和 details.retryAfterSeconds 中更长者为准。",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "mys_session",
+        "description": "管理员不透明会话 Cookie。浏览器 credentials=include；不要由 JS 设置 Cookie。"
+      }
+    },
+    "parameters": {
+      "Csrf": {
+        "name": "X-CSRF-Token",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "取自管理员登录或 GET /auth/session；与当前 Cookie 会话绑定。"
+      },
+      "Idempotency": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "同一次用户意图的网络重试复用，24小时内同 key 不同 body 返回409；新验证码/新验证结果使用新 key。"
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "description": "opaque cursor，不由前端构造。"
+      }
+    },
+    "schemas": {
+      "ErrorDetails": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "fieldErrors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "message"
+              ]
+            }
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upstreamRetcode": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "VALIDATION_ERROR",
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "CSRF_INVALID",
+              "SETUP_REQUIRED",
+              "SETUP_TOKEN_INVALID",
+              "ALREADY_INITIALIZED",
+              "AUTH_INVALID",
+              "RATE_LIMITED",
+              "NOT_FOUND",
+              "VERSION_CONFLICT",
+              "IDEMPOTENCY_CONFLICT",
+              "ACCOUNT_EXISTS",
+              "ACCOUNT_IDENTITY_MISMATCH",
+              "ACCOUNT_BUSY",
+              "ACCOUNT_DISABLED",
+              "ACCOUNT_REAUTH_REQUIRED",
+              "FLOW_EXPIRED",
+              "FLOW_STATE_CONFLICT",
+              "SMS_CODE_INVALID",
+              "CHALLENGE_REQUIRED",
+              "CHALLENGE_FAILED",
+              "CHALLENGE_EXPIRED",
+              "CHALLENGE_UNSUPPORTED",
+              "CAPABILITY_UNAVAILABLE",
+              "RUN_STATE_CONFLICT",
+              "UPSTREAM_TIMEOUT",
+              "UPSTREAM_ERROR",
+              "UPSTREAM_OUTCOME_UNKNOWN",
+              "NOTIFICATION_NOT_CONFIGURED",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "details": {
+            "$ref": "#/components/schemas/ErrorDetails"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "retryable"
+        ]
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "error",
+          "requestId"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unavailable"
+            ]
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "database",
+          "serverTime"
+        ]
+      },
+      "SetupStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "initialized": {
+            "type": "boolean"
+          },
+          "contractVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "initialized",
+          "contractVersion"
+        ]
+      },
+      "SetupRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "pattern": "^[a-zA-Z0-9_.-]+$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "Admin": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username"
+        ]
+      },
+      "Session": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "admin": {
+            "$ref": "#/components/schemas/Admin"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "csrfToken": {
+            "type": "string",
+            "description": "仅保存于前端内存，不写日志。"
+          }
+        },
+        "required": [
+          "admin",
+          "expiresAt",
+          "csrfToken"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "Ack": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "accepted"
+        ]
+      },
+      "Credential": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "valid",
+              "reauth_required",
+              "verification_required"
+            ]
+          },
+          "lastCheckedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastCookieIssuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cookieStorageExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rootExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expirySource": {
+            "type": "string",
+            "enum": [
+              "cookie_max_age",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "lastCheckedAt",
+          "lastCookieIssuedAt",
+          "cookieStorageExpiresAt",
+          "rootExpiresAt",
+          "expirySource"
+        ]
+      },
+      "TaskKind": {
+        "type": "string",
+        "enum": [
+          "community_sign",
+          "claim_rewards",
+          "browse_posts",
+          "like_posts",
+          "share_posts",
+          "game_sign"
+        ]
+      },
+      "Account": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uid": {
+            "type": "string",
+            "description": "米游社 aid，不是游戏角色 UID。"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "phoneMasked": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "active",
+              "reauth_required",
+              "verification_required"
+            ]
+          },
+          "communityIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "uniqueItems": true
+          },
+          "taskKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskKind"
+            },
+            "uniqueItems": true
+          },
+          "autoRefresh": {
+            "type": "boolean"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/Credential"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "activeCredentialOperationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "用于刷新页面后恢复正在进行的凭据操作。"
+          },
+          "activeRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "当前活动或等待人工验证的 run，其他排队记录通过 runs 列表查询。"
+          },
+          "gameRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "游戏签到选择；空数组表示所有当前绑定且可执行的角色。"
+          }
+        },
+        "required": [
+          "id",
+          "uid",
+          "nickname",
+          "phoneMasked",
+          "remark",
+          "enabled",
+          "status",
+          "communityIds",
+          "taskKinds",
+          "autoRefresh",
+          "credential",
+          "version",
+          "createdAt",
+          "updatedAt",
+          "activeCredentialOperationId",
+          "activeRunId"
+        ]
+      },
+      "AccountPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "remark": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "communityIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "taskKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskKind"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "autoRefresh": {
+            "type": "boolean"
+          },
+          "gameRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "游戏签到选择；空数组表示所有当前绑定且可执行的角色。"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "minProperties": 2
+      },
+      "PageInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "nextCursor",
+          "hasMore"
+        ]
+      },
+      "AccountPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Account"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ]
+      },
+      "TaskCapability": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/TaskKind"
+          },
+          "label": {
+            "type": "string"
+          },
+          "executable": {
+            "type": "boolean"
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "unverified",
+              "unsupported"
+            ]
+          },
+          "blockedReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "rewardMode": {
+            "type": "string",
+            "enum": [
+              "automatic",
+              "claim_required",
+              "none",
+              "unknown"
+            ]
+          },
+          "requiresExplicitOptIn": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "label",
+          "executable",
+          "verification",
+          "blockedReason",
+          "rewardMode",
+          "requiresExplicitOptIn"
+        ]
+      },
+      "Community": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "executable": {
+            "type": "boolean"
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "unverified",
+              "unsupported"
+            ]
+          },
+          "blockedReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "executable",
+          "verification",
+          "blockedReason"
+        ]
+      },
+      "Capabilities": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "type": "string"
+          },
+          "rootCredentialRenewal": {
+            "type": "boolean"
+          },
+          "captchaVersions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "gt3",
+                "gt4"
+              ]
+            }
+          },
+          "communities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Community"
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskCapability"
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameDefinition"
+            }
+          }
+        },
+        "required": [
+          "contractVersion",
+          "rootCredentialRenewal",
+          "captchaVersions",
+          "communities",
+          "tasks"
+        ]
+      },
+      "FlowState": {
+        "type": "string",
+        "enum": [
+          "created",
+          "awaiting_captcha",
+          "awaiting_sms_code",
+          "exchanging",
+          "completed",
+          "failed",
+          "canceled",
+          "expired"
+        ]
+      },
+      "LoginFlow": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "$ref": "#/components/schemas/FlowState"
+          },
+          "phoneMasked": {
+            "type": "string"
+          },
+          "targetAccountId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resendAfter": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nextAction": {
+            "type": "string",
+            "enum": [
+              "send_sms",
+              "solve_challenge",
+              "renew_challenge",
+              "submit_code",
+              "poll",
+              "restart",
+              "none"
+            ]
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "CSRF_INVALID",
+                  "SETUP_REQUIRED",
+                  "SETUP_TOKEN_INVALID",
+                  "ALREADY_INITIALIZED",
+                  "AUTH_INVALID",
+                  "RATE_LIMITED",
+                  "NOT_FOUND",
+                  "VERSION_CONFLICT",
+                  "IDEMPOTENCY_CONFLICT",
+                  "ACCOUNT_EXISTS",
+                  "ACCOUNT_IDENTITY_MISMATCH",
+                  "ACCOUNT_BUSY",
+                  "ACCOUNT_DISABLED",
+                  "ACCOUNT_REAUTH_REQUIRED",
+                  "FLOW_EXPIRED",
+                  "FLOW_STATE_CONFLICT",
+                  "SMS_CODE_INVALID",
+                  "CHALLENGE_REQUIRED",
+                  "CHALLENGE_FAILED",
+                  "CHALLENGE_EXPIRED",
+                  "CHALLENGE_UNSUPPORTED",
+                  "CAPABILITY_UNAVAILABLE",
+                  "RUN_STATE_CONFLICT",
+                  "UPSTREAM_TIMEOUT",
+                  "UPSTREAM_ERROR",
+                  "UPSTREAM_OUTCOME_UNKNOWN",
+                  "NOTIFICATION_NOT_CONFIGURED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "details": {
+                "$ref": "#/components/schemas/ErrorDetails"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable"
+            ],
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "phoneMasked",
+          "targetAccountId",
+          "accountId",
+          "expiresAt",
+          "resendAfter",
+          "nextAction",
+          "challengeId",
+          "lastError",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateFlowRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "phone": {
+            "type": "string",
+            "pattern": "^1[3-9][0-9]{9}$",
+            "writeOnly": true
+          },
+          "countryCode": {
+            "type": "string",
+            "enum": [
+              "+86"
+            ]
+          },
+          "targetAccountId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "phone",
+          "countryCode"
+        ]
+      },
+      "SubmitCodeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[0-9]{6}$",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "CaptchaConfig": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "captchaId": {
+            "type": "string"
+          },
+          "challenge": {
+            "type": "string",
+            "nullable": true
+          },
+          "newCaptcha": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "offline": {
+            "type": "boolean"
+          },
+          "product": {
+            "type": "string",
+            "enum": [
+              "bind"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "zho"
+            ]
+          },
+          "riskType": {
+            "type": "string",
+            "nullable": true
+          },
+          "userInfo": {
+            "type": "string",
+            "nullable": true,
+            "description": "官方 SDK 需要的当前会话数据，不是账号凭据。"
+          }
+        },
+        "required": [
+          "captchaId",
+          "challenge",
+          "newCaptcha",
+          "offline",
+          "product",
+          "language",
+          "riskType",
+          "userInfo"
+        ]
+      },
+      "Challenge": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerType": {
+            "type": "string",
+            "enum": [
+              "login_flow",
+              "run",
+              "credential_operation"
+            ]
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "send_sms",
+              "login",
+              "credential_refresh",
+              "community_sign",
+              "claim_rewards",
+              "browse_posts",
+              "like_posts",
+              "share_posts",
+              "game_sign"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "geetest"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "enum": [
+              "gt3",
+              "gt4"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "failed",
+              "expired"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "config": {
+            "$ref": "#/components/schemas/CaptchaConfig"
+          }
+        },
+        "required": [
+          "id",
+          "ownerType",
+          "ownerId",
+          "purpose",
+          "provider",
+          "version",
+          "state",
+          "expiresAt",
+          "config"
+        ]
+      },
+      "Gt4Result": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lot_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "captcha_output": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16384
+          },
+          "pass_token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "gen_time": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "captcha_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "lot_number",
+          "captcha_output",
+          "pass_token",
+          "gen_time"
+        ]
+      },
+      "Gt3Result": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "geetest_challenge": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "geetest_validate": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "geetest_seccode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "geetest_challenge",
+          "geetest_validate",
+          "geetest_seccode"
+        ]
+      },
+      "Gt4Submission": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "string",
+            "enum": [
+              "gt4"
+            ]
+          },
+          "result": {
+            "$ref": "#/components/schemas/Gt4Result"
+          }
+        },
+        "required": [
+          "version",
+          "result"
+        ]
+      },
+      "Gt3Submission": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "string",
+            "enum": [
+              "gt3"
+            ]
+          },
+          "result": {
+            "$ref": "#/components/schemas/Gt3Result"
+          }
+        },
+        "required": [
+          "version",
+          "result"
+        ]
+      },
+      "ChallengeSubmission": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Gt4Submission"
+          },
+          {
+            "$ref": "#/components/schemas/Gt3Submission"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "version",
+          "mapping": {
+            "gt4": "#/components/schemas/Gt4Submission",
+            "gt3": "#/components/schemas/Gt3Submission"
+          }
+        }
+      },
+      "ChallengeReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "ownerType": {
+            "type": "string",
+            "enum": [
+              "login_flow",
+              "run",
+              "credential_operation"
+            ]
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nextAction": {
+            "type": "string",
+            "enum": [
+              "poll_owner"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "challengeId",
+          "accepted",
+          "ownerType",
+          "ownerId",
+          "nextAction",
+          "message"
+        ]
+      },
+      "CredentialOperation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "check",
+              "refresh_cookie"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "awaiting_verification",
+              "succeeded",
+              "failed",
+              "canceled"
+            ]
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "CSRF_INVALID",
+                  "SETUP_REQUIRED",
+                  "SETUP_TOKEN_INVALID",
+                  "ALREADY_INITIALIZED",
+                  "AUTH_INVALID",
+                  "RATE_LIMITED",
+                  "NOT_FOUND",
+                  "VERSION_CONFLICT",
+                  "IDEMPOTENCY_CONFLICT",
+                  "ACCOUNT_EXISTS",
+                  "ACCOUNT_IDENTITY_MISMATCH",
+                  "ACCOUNT_BUSY",
+                  "ACCOUNT_DISABLED",
+                  "ACCOUNT_REAUTH_REQUIRED",
+                  "FLOW_EXPIRED",
+                  "FLOW_STATE_CONFLICT",
+                  "SMS_CODE_INVALID",
+                  "CHALLENGE_REQUIRED",
+                  "CHALLENGE_FAILED",
+                  "CHALLENGE_EXPIRED",
+                  "CHALLENGE_UNSUPPORTED",
+                  "CAPABILITY_UNAVAILABLE",
+                  "RUN_STATE_CONFLICT",
+                  "UPSTREAM_TIMEOUT",
+                  "UPSTREAM_ERROR",
+                  "UPSTREAM_OUTCOME_UNKNOWN",
+                  "NOTIFICATION_NOT_CONFIGURED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "details": {
+                "$ref": "#/components/schemas/ErrorDetails"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable"
+            ],
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "accountId",
+          "kind",
+          "state",
+          "challengeId",
+          "account",
+          "error",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CredentialOperationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "check",
+              "refresh_cookie"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "Mission": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "适配器稳定任务标识，不能当作所有账号通用的写接口参数。"
+          },
+          "upstreamMissionId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "community_sign",
+              "claim_rewards",
+              "browse_posts",
+              "like_posts",
+              "share_posts",
+              "other"
+            ]
+          },
+          "communityId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "progress": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "target": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "rewardClaimed": {
+            "type": "boolean"
+          },
+          "rewardPoints": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "executable": {
+            "type": "boolean"
+          },
+          "blockedReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "rewardMode": {
+            "type": "string",
+            "enum": [
+              "automatic",
+              "claim_required",
+              "none",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "upstreamMissionId",
+          "key",
+          "label",
+          "kind",
+          "communityId",
+          "progress",
+          "target",
+          "completed",
+          "rewardClaimed",
+          "rewardPoints",
+          "executable",
+          "blockedReason",
+          "rewardMode"
+        ]
+      },
+      "MissionSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "totalPoints": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "todayReceivedPoints": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "upstreamCanGetPoints": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "missions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mission"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "accountId",
+          "businessDate",
+          "fetchedAt",
+          "stale",
+          "totalPoints",
+          "todayReceivedPoints",
+          "upstreamCanGetPoints",
+          "missions",
+          "warnings"
+        ]
+      },
+      "Schedule": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "hour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "minute": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          },
+          "timezone": {
+            "type": "string",
+            "enum": [
+              "Asia/Shanghai"
+            ]
+          },
+          "jitterMaxMinutes": {
+            "type": "integer",
+            "enum": [
+              10
+            ]
+          },
+          "nextRunAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "accountId",
+          "enabled",
+          "hour",
+          "minute",
+          "timezone",
+          "jitterMaxMinutes",
+          "nextRunAt",
+          "version"
+        ]
+      },
+      "SchedulePatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "hour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "minute": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 59
+          },
+          "timezone": {
+            "type": "string",
+            "enum": [
+              "Asia/Shanghai"
+            ]
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "minProperties": 2
+      },
+      "RunState": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "running",
+          "awaiting_verification",
+          "succeeded",
+          "partially_succeeded",
+          "failed",
+          "outcome_unknown",
+          "canceled"
+        ]
+      },
+      "StepState": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "running",
+          "awaiting_verification",
+          "succeeded",
+          "already_completed",
+          "failed",
+          "outcome_unknown",
+          "skipped",
+          "canceled"
+        ]
+      },
+      "RunStep": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "communityId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "taskKind": {
+            "$ref": "#/components/schemas/TaskKind"
+          },
+          "state": {
+            "$ref": "#/components/schemas/StepState"
+          },
+          "message": {
+            "type": "string"
+          },
+          "rewardPoints": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "upstreamRetcode": {
+            "type": "integer",
+            "nullable": true
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "gameRoleId": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "gameName": {
+            "type": "string"
+          },
+          "rewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameReward"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "communityId",
+          "taskKind",
+          "state",
+          "message",
+          "rewardPoints",
+          "upstreamRetcode",
+          "startedAt",
+          "finishedAt"
+        ]
+      },
+      "Run": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "scheduled",
+              "retry"
+            ]
+          },
+          "parentRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "state": {
+            "$ref": "#/components/schemas/RunState"
+          },
+          "communityIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 0
+          },
+          "taskKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskKind"
+            },
+            "minItems": 1
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunStep"
+            }
+          },
+          "confirmedRewardPoints": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cancelRequestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "CSRF_INVALID",
+                  "SETUP_REQUIRED",
+                  "SETUP_TOKEN_INVALID",
+                  "ALREADY_INITIALIZED",
+                  "AUTH_INVALID",
+                  "RATE_LIMITED",
+                  "NOT_FOUND",
+                  "VERSION_CONFLICT",
+                  "IDEMPOTENCY_CONFLICT",
+                  "ACCOUNT_EXISTS",
+                  "ACCOUNT_IDENTITY_MISMATCH",
+                  "ACCOUNT_BUSY",
+                  "ACCOUNT_DISABLED",
+                  "ACCOUNT_REAUTH_REQUIRED",
+                  "FLOW_EXPIRED",
+                  "FLOW_STATE_CONFLICT",
+                  "SMS_CODE_INVALID",
+                  "CHALLENGE_REQUIRED",
+                  "CHALLENGE_FAILED",
+                  "CHALLENGE_EXPIRED",
+                  "CHALLENGE_UNSUPPORTED",
+                  "CAPABILITY_UNAVAILABLE",
+                  "RUN_STATE_CONFLICT",
+                  "UPSTREAM_TIMEOUT",
+                  "UPSTREAM_ERROR",
+                  "UPSTREAM_OUTCOME_UNKNOWN",
+                  "NOTIFICATION_NOT_CONFIGURED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "details": {
+                "$ref": "#/components/schemas/ErrorDetails"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable"
+            ],
+            "nullable": true
+          },
+          "gameRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "游戏签到选择；空数组表示所有当前绑定且可执行的角色。"
+          }
+        },
+        "required": [
+          "id",
+          "accountId",
+          "source",
+          "parentRunId",
+          "businessDate",
+          "state",
+          "communityIds",
+          "taskKinds",
+          "challengeId",
+          "steps",
+          "confirmedRewardPoints",
+          "cancelRequestedAt",
+          "createdAt",
+          "startedAt",
+          "finishedAt",
+          "error"
+        ]
+      },
+      "RunRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "communityIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "taskKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskKind"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "gameRoleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "游戏签到选择；空数组表示所有当前绑定且可执行的角色。"
+          }
+        },
+        "required": [
+          "communityIds",
+          "taskKinds"
+        ]
+      },
+      "RunPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Run"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ]
+      },
+      "RunEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "stepId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "runId",
+          "level",
+          "message",
+          "stepId",
+          "createdAt"
+        ]
+      },
+      "RunEventPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunEvent"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ]
+      },
+      "SystemSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "enum": [
+              "Asia/Shanghai"
+            ]
+          },
+          "pauseScheduler": {
+            "type": "boolean"
+          },
+          "logRetentionDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 365
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "timezone",
+          "pauseScheduler",
+          "logRetentionDays",
+          "version"
+        ]
+      },
+      "SystemSettingsPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pauseScheduler": {
+            "type": "boolean"
+          },
+          "logRetentionDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 365
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "minProperties": 2
+      },
+      "NotificationSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "failures_and_actions",
+              "every_run"
+            ]
+          },
+          "smtpHost": {
+            "type": "string"
+          },
+          "smtpPort": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "smtpSecurity": {
+            "type": "string",
+            "enum": [
+              "ssl",
+              "starttls"
+            ]
+          },
+          "smtpUsername": {
+            "type": "string"
+          },
+          "smtpPasswordConfigured": {
+            "type": "boolean"
+          },
+          "fromAddress": {
+            "type": "string"
+          },
+          "toAddress": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "enabled",
+          "policy",
+          "smtpHost",
+          "smtpPort",
+          "smtpSecurity",
+          "smtpUsername",
+          "smtpPasswordConfigured",
+          "fromAddress",
+          "toAddress",
+          "version"
+        ]
+      },
+      "NotificationSettingsPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "failures_and_actions",
+              "every_run"
+            ]
+          },
+          "smtpHost": {
+            "type": "string",
+            "maxLength": 253
+          },
+          "smtpPort": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "smtpSecurity": {
+            "type": "string",
+            "enum": [
+              "ssl",
+              "starttls"
+            ]
+          },
+          "smtpUsername": {
+            "type": "string",
+            "maxLength": 254
+          },
+          "smtpPassword": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1024,
+            "writeOnly": true,
+            "description": "省略或 null 为保留；非空字符串为替换。"
+          },
+          "clearPassword": {
+            "type": "boolean"
+          },
+          "fromAddress": {
+            "type": "string",
+            "format": "email"
+          },
+          "toAddress": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "minProperties": 2
+      },
+      "NotificationTest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "sending",
+              "succeeded",
+              "failed"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "CSRF_INVALID",
+                  "SETUP_REQUIRED",
+                  "SETUP_TOKEN_INVALID",
+                  "ALREADY_INITIALIZED",
+                  "AUTH_INVALID",
+                  "RATE_LIMITED",
+                  "NOT_FOUND",
+                  "VERSION_CONFLICT",
+                  "IDEMPOTENCY_CONFLICT",
+                  "ACCOUNT_EXISTS",
+                  "ACCOUNT_IDENTITY_MISMATCH",
+                  "ACCOUNT_BUSY",
+                  "ACCOUNT_DISABLED",
+                  "ACCOUNT_REAUTH_REQUIRED",
+                  "FLOW_EXPIRED",
+                  "FLOW_STATE_CONFLICT",
+                  "SMS_CODE_INVALID",
+                  "CHALLENGE_REQUIRED",
+                  "CHALLENGE_FAILED",
+                  "CHALLENGE_EXPIRED",
+                  "CHALLENGE_UNSUPPORTED",
+                  "CAPABILITY_UNAVAILABLE",
+                  "RUN_STATE_CONFLICT",
+                  "UPSTREAM_TIMEOUT",
+                  "UPSTREAM_ERROR",
+                  "UPSTREAM_OUTCOME_UNKNOWN",
+                  "NOTIFICATION_NOT_CONFIGURED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "details": {
+                "$ref": "#/components/schemas/ErrorDetails"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "retryable"
+            ],
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "error",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Dashboard": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "accountCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "activeAccountCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "actionRequiredCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "todaySucceededRuns": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "todayFailedRuns": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "todayConfirmedRewardPoints": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "activeRuns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Run"
+            }
+          }
+        },
+        "required": [
+          "businessDate",
+          "accountCount",
+          "activeAccountCount",
+          "actionRequiredCount",
+          "todaySucceededRuns",
+          "todayFailedRuns",
+          "todayConfirmedRewardPoints",
+          "activeRuns"
+        ]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Health"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "SetupStatusResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SetupStatus"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "AdminResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Admin"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "SessionResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Session"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "AckResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Ack"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "AccountResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "AccountPageResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AccountPage"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "CapabilitiesResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Capabilities"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "LoginFlowResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/LoginFlow"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "ChallengeResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Challenge"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "ChallengeReceiptResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ChallengeReceipt"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "CredentialOperationResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CredentialOperation"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "MissionSnapshotResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MissionSnapshot"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "ScheduleResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Schedule"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "RunResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Run"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "RunPageResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RunPage"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "RunEventPageResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RunEventPage"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "SystemSettingsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SystemSettings"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "NotificationSettingsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NotificationSettings"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "NotificationTestResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NotificationTest"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Dashboard"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      },
+      "GameReward": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "count",
+          "icon"
+        ]
+      },
+      "GameDefinition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameBiz": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "communityId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "executable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "gameBiz",
+          "name",
+          "communityId",
+          "executable"
+        ]
+      },
+      "GameRole": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "gameBiz": {
+            "type": "string"
+          },
+          "gameName": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "regionName": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "communityId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "executable": {
+            "type": "boolean"
+          },
+          "blockedReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "not_signed",
+              "signed",
+              "unavailable"
+            ]
+          },
+          "totalSignDays": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true
+          },
+          "reward": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "icon": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "name",
+              "count",
+              "icon"
+            ]
+          },
+          "lastCheckedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "gameBiz",
+          "gameName",
+          "uid",
+          "region",
+          "regionName",
+          "nickname",
+          "level",
+          "communityId",
+          "executable",
+          "blockedReason",
+          "status",
+          "totalSignDays",
+          "reward",
+          "lastCheckedAt"
+        ]
+      },
+      "GameRolesSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameRole"
+            }
+          }
+        },
+        "required": [
+          "accountId",
+          "fetchedAt",
+          "stale",
+          "roles"
+        ]
+      },
+      "GameRolesSnapshotResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GameRolesSnapshot"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "data",
+          "requestId"
+        ]
+      }
+    }
+  }
+}

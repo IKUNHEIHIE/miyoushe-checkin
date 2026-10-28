@@ -1,0 +1,9 @@
+**
+!backend/
+!backend/package.json
+!backend/package-lock.json
+!backend/tsconfig.json
+!backend/src/
+!backend/src/**
+!docs/
+!docs/openapi.json

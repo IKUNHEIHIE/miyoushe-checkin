@@ -1,0 +1,1688 @@
+{
+  "contractVersion": "0.2.0",
+  "notice": "全部为虚构数据；这是静态场景集，不是可运行 mock 服务。不同场景的 ID 可能有意复用；独立场景不要拼成一条真实会话。验证码、captchaId、令牌均为占位，禁止提交到真实官方接口。",
+  "scenarios": [
+    {
+      "id": "setup-required",
+      "description": "未初始化的实例",
+      "request": {
+        "operationId": "getSetupStatus",
+        "method": "GET",
+        "pathTemplate": "/setup/status",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "initialized": false,
+          "contractVersion": "0.2.0"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "admin-session",
+      "description": "已登录管理员",
+      "request": {
+        "operationId": "getAdminSession",
+        "method": "GET",
+        "pathTemplate": "/auth/session",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "admin": {
+            "id": "88888888-8888-4888-8888-888888888888",
+            "username": "admin-demo"
+          },
+          "expiresAt": "2026-10-24T00:00:00Z",
+          "csrfToken": "mock-only-csrf-token"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "capabilities",
+      "description": "按实测程度渲染能力",
+      "request": {
+        "operationId": "getCapabilities",
+        "method": "GET",
+        "pathTemplate": "/capabilities",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "contractVersion": "0.2.0",
+          "rootCredentialRenewal": false,
+          "captchaVersions": [
+            "gt4"
+          ],
+          "communities": [
+            {
+              "id": 2,
+              "name": "原神",
+              "executable": true,
+              "verification": "verified",
+              "blockedReason": null
+            },
+            {
+              "id": 6,
+              "name": "崩坏：星穹铁道",
+              "executable": false,
+              "verification": "unverified",
+              "blockedReason": "待完成官方接口实测"
+            }
+          ],
+          "tasks": [
+            {
+              "kind": "community_sign",
+              "label": "社区签到",
+              "executable": true,
+              "verification": "verified",
+              "blockedReason": null,
+              "rewardMode": "automatic",
+              "requiresExplicitOptIn": false
+            },
+            {
+              "kind": "claim_rewards",
+              "label": "独立领取奖励",
+              "executable": false,
+              "verification": "unverified",
+              "blockedReason": "本次签到自动到账，独立领奖尚未验证",
+              "rewardMode": "claim_required",
+              "requiresExplicitOptIn": true
+            },
+            {
+              "kind": "browse_posts",
+              "label": "浏览帖子",
+              "executable": false,
+              "verification": "unverified",
+              "blockedReason": "任务规则与接口待验证",
+              "rewardMode": "unknown",
+              "requiresExplicitOptIn": true
+            },
+            {
+              "kind": "like_posts",
+              "label": "点赞帖子",
+              "executable": false,
+              "verification": "unverified",
+              "blockedReason": "任务规则与接口待验证",
+              "rewardMode": "unknown",
+              "requiresExplicitOptIn": true
+            },
+            {
+              "kind": "share_posts",
+              "label": "分享任务",
+              "executable": false,
+              "verification": "unverified",
+              "blockedReason": "任务规则与接口待验证",
+              "rewardMode": "unknown",
+              "requiresExplicitOptIn": true
+            },
+            {
+              "kind": "game_sign",
+              "label": "签到福利（游戏奖励）",
+              "executable": true,
+              "verification": "unverified",
+              "blockedReason": null,
+              "rewardMode": "automatic",
+              "requiresExplicitOptIn": false
+            }
+          ]
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "accounts-empty",
+      "description": "空账号列表",
+      "request": {
+        "operationId": "listAccounts",
+        "method": "GET",
+        "pathTemplate": "/accounts",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [],
+          "page": {
+            "nextCursor": null,
+            "hasMore": false
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "accounts-ready",
+      "description": "已添加的演示账号",
+      "request": {
+        "operationId": "listAccounts",
+        "method": "GET",
+        "pathTemplate": "/accounts",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "id": "11111111-1111-4111-8111-111111111111",
+              "uid": "100000001",
+              "nickname": "演示账号",
+              "phoneMasked": "139****0000",
+              "remark": "虚构数据，仅供前端开发",
+              "enabled": true,
+              "status": "active",
+              "communityIds": [
+                2
+              ],
+              "taskKinds": [
+                "community_sign"
+              ],
+              "autoRefresh": true,
+              "credential": {
+                "status": "valid",
+                "lastCheckedAt": "2026-10-23T12:00:00Z",
+                "lastCookieIssuedAt": "2026-10-23T12:00:00Z",
+                "cookieStorageExpiresAt": "2026-10-25T12:00:00Z",
+                "rootExpiresAt": null,
+                "expirySource": "cookie_max_age"
+              },
+              "version": 1,
+              "createdAt": "2026-10-23T12:00:00Z",
+              "updatedAt": "2026-10-23T12:00:00Z",
+              "activeCredentialOperationId": null,
+              "activeRunId": null
+            }
+          ],
+          "page": {
+            "nextCursor": null,
+            "hasMore": false
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "account-reauth-required",
+      "description": "根凭据失效，不显示虚假倒计时",
+      "request": {
+        "operationId": "getAccount",
+        "method": "GET",
+        "pathTemplate": "/accounts/{accountId}",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "uid": "100000001",
+          "nickname": "演示账号",
+          "phoneMasked": "139****0000",
+          "remark": "虚构数据，仅供前端开发",
+          "enabled": true,
+          "status": "reauth_required",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "autoRefresh": true,
+          "credential": {
+            "status": "reauth_required",
+            "lastCheckedAt": "2026-10-23T12:00:00Z",
+            "lastCookieIssuedAt": "2026-10-23T12:00:00Z",
+            "cookieStorageExpiresAt": null,
+            "rootExpiresAt": null,
+            "expirySource": "unknown"
+          },
+          "version": 1,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z",
+          "activeCredentialOperationId": null,
+          "activeRunId": null
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-created",
+      "description": "先创建流程，不自动发短信",
+      "request": {
+        "operationId": "createLoginFlow",
+        "method": "POST",
+        "pathTemplate": "/login-flows",
+        "pathParams": {},
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "e33e159f-37ce-4938-9a53-5069a6fda615"
+        },
+        "body": {
+          "phone": "13900000000",
+          "countryCode": "+86"
+        }
+      },
+      "status": 201,
+      "response": {
+        "data": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "state": "created",
+          "phoneMasked": "139****0000",
+          "targetAccountId": null,
+          "accountId": null,
+          "expiresAt": "2026-10-23T12:10:00Z",
+          "resendAfter": null,
+          "nextAction": "send_sms",
+          "challengeId": null,
+          "lastError": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-awaiting-captcha",
+      "description": "发送短信需要人工验证",
+      "request": {
+        "operationId": "sendLoginSms",
+        "method": "POST",
+        "pathTemplate": "/login-flows/{flowId}/send-sms",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "049a6b6d-0043-4cbc-8c6a-def3f177eaf5"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "state": "awaiting_captcha",
+          "phoneMasked": "139****0000",
+          "targetAccountId": null,
+          "accountId": null,
+          "expiresAt": "2026-10-23T12:10:00Z",
+          "resendAfter": null,
+          "nextAction": "solve_challenge",
+          "challengeId": "33333333-3333-4333-8333-333333333333",
+          "lastError": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "challenge-gt4",
+      "description": "假配置，仅模拟弹层，禁止真实初始化官方 SDK",
+      "request": {
+        "operationId": "getChallenge",
+        "method": "GET",
+        "pathTemplate": "/challenges/{challengeId}",
+        "pathParams": {
+          "challengeId": "33333333-3333-4333-8333-333333333333"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "ownerType": "login_flow",
+          "ownerId": "22222222-2222-4222-8222-222222222222",
+          "purpose": "send_sms",
+          "provider": "geetest",
+          "version": "gt4",
+          "state": "pending",
+          "expiresAt": "2026-10-23T12:05:00Z",
+          "config": {
+            "captchaId": "mock-not-a-real-captcha-id",
+            "challenge": null,
+            "newCaptcha": null,
+            "offline": false,
+            "product": "bind",
+            "language": "zho",
+            "riskType": "slide",
+            "userInfo": null
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "challenge-accepted",
+      "description": "验证提交成功不代表登录已完成",
+      "request": {
+        "operationId": "submitChallenge",
+        "method": "POST",
+        "pathTemplate": "/challenges/{challengeId}/submit",
+        "pathParams": {
+          "challengeId": "33333333-3333-4333-8333-333333333333"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "9c65ef91-07fe-4524-b80b-98e111e35ad8"
+        },
+        "body": {
+          "version": "gt4",
+          "result": {
+            "lot_number": "mock-lot",
+            "captcha_output": "mock-output",
+            "pass_token": "mock-pass",
+            "gen_time": "1792756800"
+          }
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "challengeId": "33333333-3333-4333-8333-333333333333",
+          "accepted": true,
+          "ownerType": "login_flow",
+          "ownerId": "22222222-2222-4222-8222-222222222222",
+          "nextAction": "poll_owner",
+          "message": "验证结果已处理，请查询登录进度"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-sms-sent",
+      "description": "只有此状态才表示短信发送成功",
+      "request": {
+        "operationId": "getLoginFlow",
+        "method": "GET",
+        "pathTemplate": "/login-flows/{flowId}",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "state": "awaiting_sms_code",
+          "phoneMasked": "139****0000",
+          "targetAccountId": null,
+          "accountId": null,
+          "expiresAt": "2026-10-23T12:10:00Z",
+          "resendAfter": "2026-10-23T12:01:00Z",
+          "nextAction": "submit_code",
+          "challengeId": null,
+          "lastError": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-exchanging",
+      "description": "提交验证码后后台交换凭据",
+      "request": {
+        "operationId": "submitLoginCode",
+        "method": "POST",
+        "pathTemplate": "/login-flows/{flowId}/submit-code",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "4a7a085d-aa0c-4032-9a70-602962ea13ce"
+        },
+        "body": {
+          "code": "000000"
+        }
+      },
+      "status": 202,
+      "response": {
+        "data": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "state": "exchanging",
+          "phoneMasked": "139****0000",
+          "targetAccountId": null,
+          "accountId": null,
+          "expiresAt": "2026-10-23T12:10:00Z",
+          "resendAfter": "2026-10-23T12:01:00Z",
+          "nextAction": "poll",
+          "challengeId": null,
+          "lastError": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-completed",
+      "description": "绑定成功并跳转账号",
+      "request": {
+        "operationId": "getLoginFlow",
+        "method": "GET",
+        "pathTemplate": "/login-flows/{flowId}",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "state": "completed",
+          "phoneMasked": "139****0000",
+          "targetAccountId": null,
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "expiresAt": "2026-10-23T12:10:00Z",
+          "resendAfter": null,
+          "nextAction": "none",
+          "challengeId": null,
+          "lastError": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-invalid-code",
+      "description": "错误验证码422并保留输入界面",
+      "request": {
+        "operationId": "submitLoginCode",
+        "method": "POST",
+        "pathTemplate": "/login-flows/{flowId}/submit-code",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "72b8786d-e328-4d4e-9699-d22de56e7c53"
+        },
+        "body": {
+          "code": "000001"
+        }
+      },
+      "status": 422,
+      "response": {
+        "error": {
+          "code": "SMS_CODE_INVALID",
+          "message": "验证码无效，请检查后重试",
+          "retryable": false
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "flow-expired",
+      "description": "本地登录流程已过期",
+      "request": {
+        "operationId": "getLoginFlow",
+        "method": "GET",
+        "pathTemplate": "/login-flows/{flowId}",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {}
+      },
+      "status": 410,
+      "response": {
+        "error": {
+          "code": "FLOW_EXPIRED",
+          "message": "登录流程已过期，请重新开始",
+          "retryable": false
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "challenge-failed",
+      "description": "人工验证结果被官方拒绝，用户主动更新会话",
+      "request": {
+        "operationId": "submitChallenge",
+        "method": "POST",
+        "pathTemplate": "/challenges/{challengeId}/submit",
+        "pathParams": {
+          "challengeId": "33333333-3333-4333-8333-333333333333"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "dc89c84b-2754-4197-a4ec-bccd32727089"
+        },
+        "body": {
+          "version": "gt4",
+          "result": {
+            "lot_number": "mock-old-lot",
+            "captcha_output": "mock-output",
+            "pass_token": "mock-pass",
+            "gen_time": "1792756800"
+          }
+        }
+      },
+      "status": 422,
+      "response": {
+        "error": {
+          "code": "CHALLENGE_FAILED",
+          "message": "验证未通过，请更新会话后重新手动验证",
+          "retryable": false,
+          "details": {
+            "upstreamRetcode": -3102
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "sms-rate-limited",
+      "description": "遵守服务端冷却，不循环发送",
+      "request": {
+        "operationId": "sendLoginSms",
+        "method": "POST",
+        "pathTemplate": "/login-flows/{flowId}/send-sms",
+        "pathParams": {
+          "flowId": "22222222-2222-4222-8222-222222222222"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "1d329ae8-ef69-4e71-9ac6-dcd01b7415e4"
+        }
+      },
+      "status": 429,
+      "response": {
+        "error": {
+          "code": "RATE_LIMITED",
+          "message": "请稍后再发送验证码",
+          "retryable": true,
+          "details": {
+            "retryAfterSeconds": 60
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "missions-unfetched",
+      "description": "尚无任务快照，不把未知余额显示成0",
+      "request": {
+        "operationId": "getAccountMissions",
+        "method": "GET",
+        "pathTemplate": "/accounts/{accountId}/missions",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "businessDate": "2026-10-23",
+          "fetchedAt": null,
+          "stale": true,
+          "totalPoints": null,
+          "todayReceivedPoints": null,
+          "upstreamCanGetPoints": null,
+          "missions": [],
+          "warnings": [
+            "尚未获取任务，请点击刷新"
+          ]
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "missions-signed",
+      "description": "签到后任务与奖励已核对",
+      "request": {
+        "operationId": "refreshAccountMissions",
+        "method": "POST",
+        "pathTemplate": "/accounts/{accountId}/missions/refresh",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "4c7e4be3-2a7d-452b-a50d-607b385fb1ac"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "businessDate": "2026-10-23",
+          "fetchedAt": "2026-10-23T12:00:00Z",
+          "stale": false,
+          "totalPoints": 1030,
+          "todayReceivedPoints": 30,
+          "upstreamCanGetPoints": 0,
+          "missions": [
+            {
+              "id": "community-sign-2",
+              "upstreamMissionId": 58,
+              "key": "continuous_sign",
+              "label": "社区签到",
+              "kind": "community_sign",
+              "communityId": 2,
+              "progress": 1,
+              "target": 1,
+              "completed": true,
+              "rewardClaimed": true,
+              "rewardPoints": 30,
+              "executable": true,
+              "blockedReason": null,
+              "rewardMode": "automatic"
+            }
+          ],
+          "warnings": []
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "schedule-off",
+      "description": "初始每日计划关闭",
+      "request": {
+        "operationId": "getAccountSchedule",
+        "method": "GET",
+        "pathTemplate": "/accounts/{accountId}/schedule",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "enabled": false,
+          "hour": 6,
+          "minute": 0,
+          "timezone": "Asia/Shanghai",
+          "jitterMaxMinutes": 10,
+          "nextRunAt": null,
+          "version": 1
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-queued",
+      "description": "已受理后台任务",
+      "request": {
+        "operationId": "createAccountRun",
+        "method": "POST",
+        "pathTemplate": "/accounts/{accountId}/runs",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "6c9bd4f3-5906-413a-ba0f-c085fcde950b"
+        },
+        "body": {
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ]
+        }
+      },
+      "status": 202,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "queued",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": null,
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "pending",
+              "message": "等待执行",
+              "rewardPoints": null,
+              "upstreamRetcode": null,
+              "startedAt": null,
+              "finishedAt": null
+            }
+          ],
+          "confirmedRewardPoints": 0,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": null,
+          "finishedAt": null,
+          "error": null
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-awaiting-verification",
+      "description": "任务暂停等待用户手动验证",
+      "request": {
+        "operationId": "getRun",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "awaiting_verification",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": "33333333-3333-4333-8333-333333333333",
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "awaiting_verification",
+              "message": "请手动完成验证",
+              "rewardPoints": null,
+              "upstreamRetcode": null,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": null
+            }
+          ],
+          "confirmedRewardPoints": 0,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": "2026-10-23T12:00:00Z",
+          "finishedAt": null,
+          "error": null
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "challenge-run",
+      "description": "运行阶段的挑战与登录挑战使用同一界面",
+      "request": {
+        "operationId": "getChallenge",
+        "method": "GET",
+        "pathTemplate": "/challenges/{challengeId}",
+        "pathParams": {
+          "challengeId": "33333333-3333-4333-8333-333333333333"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "ownerType": "run",
+          "ownerId": "44444444-4444-4444-8444-444444444444",
+          "purpose": "community_sign",
+          "provider": "geetest",
+          "version": "gt4",
+          "state": "pending",
+          "expiresAt": "2026-10-23T12:05:00Z",
+          "config": {
+            "captchaId": "mock-not-a-real-captcha-id",
+            "challenge": null,
+            "newCaptcha": null,
+            "offline": false,
+            "product": "bind",
+            "language": "zho",
+            "riskType": "slide",
+            "userInfo": null
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-succeeded",
+      "description": "已确认奖励到账",
+      "request": {
+        "operationId": "getRun",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "succeeded",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": null,
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "succeeded",
+              "message": "已确认签到完成，奖励到账",
+              "rewardPoints": 30,
+              "upstreamRetcode": 0,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": "2026-10-23T12:00:05Z"
+            }
+          ],
+          "confirmedRewardPoints": 30,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": "2026-10-23T12:00:00Z",
+          "finishedAt": "2026-10-23T12:00:05Z",
+          "error": null
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-already-completed",
+      "description": "有状态证据时显示已完成，不重复计入奖励",
+      "request": {
+        "operationId": "getRun",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "succeeded",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": null,
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "already_completed",
+              "message": "已核对今日任务已完成",
+              "rewardPoints": 0,
+              "upstreamRetcode": 1008,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": "2026-10-23T12:00:05Z"
+            }
+          ],
+          "confirmedRewardPoints": 0,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": "2026-10-23T12:00:00Z",
+          "finishedAt": "2026-10-23T12:00:05Z",
+          "error": null
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-outcome-unknown",
+      "description": "写请求结果无法确认，不显示成功或自动重试",
+      "request": {
+        "operationId": "getRun",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "outcome_unknown",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": null,
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "outcome_unknown",
+              "message": "请求超时且状态无法核对",
+              "rewardPoints": null,
+              "upstreamRetcode": null,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": "2026-10-23T12:00:20Z"
+            }
+          ],
+          "confirmedRewardPoints": 0,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": "2026-10-23T12:00:00Z",
+          "finishedAt": "2026-10-23T12:00:20Z",
+          "error": {
+            "code": "UPSTREAM_OUTCOME_UNKNOWN",
+            "message": "执行结果待核对",
+            "retryable": false
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "credential-refresh-queued",
+      "description": "工作 Cookie 更新是异步操作",
+      "request": {
+        "operationId": "startCredentialOperation",
+        "method": "POST",
+        "pathTemplate": "/accounts/{accountId}/credential-operations",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "393f40a8-a734-4f38-bf8c-aca968f7ddde"
+        },
+        "body": {
+          "kind": "refresh_cookie"
+        }
+      },
+      "status": 202,
+      "response": {
+        "data": {
+          "id": "66666666-6666-4666-8666-666666666666",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "kind": "refresh_cookie",
+          "state": "queued",
+          "challengeId": null,
+          "account": {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "uid": "100000001",
+            "nickname": "演示账号",
+            "phoneMasked": "139****0000",
+            "remark": "虚构数据，仅供前端开发",
+            "enabled": true,
+            "status": "active",
+            "communityIds": [
+              2
+            ],
+            "taskKinds": [
+              "community_sign"
+            ],
+            "autoRefresh": true,
+            "credential": {
+              "status": "valid",
+              "lastCheckedAt": "2026-10-23T12:00:00Z",
+              "lastCookieIssuedAt": "2026-10-23T12:00:00Z",
+              "cookieStorageExpiresAt": "2026-10-25T12:00:00Z",
+              "rootExpiresAt": null,
+              "expirySource": "cookie_max_age"
+            },
+            "version": 1,
+            "createdAt": "2026-10-23T12:00:00Z",
+            "updatedAt": "2026-10-23T12:00:00Z",
+            "activeCredentialOperationId": "66666666-6666-4666-8666-666666666666",
+            "activeRunId": null
+          },
+          "error": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "credential-refresh-complete",
+      "description": "操作成功不代表根凭据续期",
+      "request": {
+        "operationId": "getCredentialOperation",
+        "method": "GET",
+        "pathTemplate": "/credential-operations/{operationId}",
+        "pathParams": {
+          "operationId": "66666666-6666-4666-8666-666666666666"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "66666666-6666-4666-8666-666666666666",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "kind": "refresh_cookie",
+          "state": "succeeded",
+          "challengeId": null,
+          "account": {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "uid": "100000001",
+            "nickname": "演示账号",
+            "phoneMasked": "139****0000",
+            "remark": "虚构数据，仅供前端开发",
+            "enabled": true,
+            "status": "active",
+            "communityIds": [
+              2
+            ],
+            "taskKinds": [
+              "community_sign"
+            ],
+            "autoRefresh": true,
+            "credential": {
+              "status": "valid",
+              "lastCheckedAt": "2026-10-23T12:00:00Z",
+              "lastCookieIssuedAt": "2026-10-23T12:00:00Z",
+              "cookieStorageExpiresAt": "2026-10-25T12:00:00Z",
+              "rootExpiresAt": null,
+              "expirySource": "cookie_max_age"
+            },
+            "version": 1,
+            "createdAt": "2026-10-23T12:00:00Z",
+            "updatedAt": "2026-10-23T12:00:00Z",
+            "activeCredentialOperationId": null,
+            "activeRunId": null
+          },
+          "error": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "account-version-conflict",
+      "description": "其他页面已更新账号，重新获取后人工合并",
+      "request": {
+        "operationId": "updateAccount",
+        "method": "PATCH",
+        "pathTemplate": "/accounts/{accountId}",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token"
+        },
+        "body": {
+          "version": 1,
+          "remark": "演示修改"
+        }
+      },
+      "status": 409,
+      "response": {
+        "error": {
+          "code": "VERSION_CONFLICT",
+          "message": "配置已更新，请刷新后重试",
+          "retryable": false
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "notification-settings",
+      "description": "密码仅展示已配置状态",
+      "request": {
+        "operationId": "getNotificationSettings",
+        "method": "GET",
+        "pathTemplate": "/settings/notifications",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "enabled": false,
+          "policy": "failures_and_actions",
+          "smtpHost": "smtp.example.invalid",
+          "smtpPort": 465,
+          "smtpSecurity": "ssl",
+          "smtpUsername": "demo@example.invalid",
+          "smtpPasswordConfigured": false,
+          "fromAddress": "demo@example.invalid",
+          "toAddress": "owner@example.invalid",
+          "version": 1
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "settings",
+      "description": "单实例设置",
+      "request": {
+        "operationId": "getSystemSettings",
+        "method": "GET",
+        "pathTemplate": "/settings/system",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "timezone": "Asia/Shanghai",
+          "pauseScheduler": false,
+          "logRetentionDays": 90,
+          "version": 1
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "dashboard",
+      "description": "概览数据为虚构聚合值",
+      "request": {
+        "operationId": "getDashboard",
+        "method": "GET",
+        "pathTemplate": "/dashboard",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "businessDate": "2026-10-23",
+          "accountCount": 1,
+          "activeAccountCount": 1,
+          "actionRequiredCount": 0,
+          "todaySucceededRuns": 1,
+          "todayFailedRuns": 0,
+          "todayConfirmedRewardPoints": 30,
+          "activeRuns": []
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "session-expired",
+      "description": "管理员会话失效须回到面板登录",
+      "request": {
+        "operationId": "getAdminSession",
+        "method": "GET",
+        "pathTemplate": "/auth/session",
+        "pathParams": {},
+        "headers": {}
+      },
+      "status": 401,
+      "response": {
+        "error": {
+          "code": "UNAUTHENTICATED",
+          "message": "面板会话已过期",
+          "retryable": false
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "unsupported-task",
+      "description": "未验证功能不能伪装可用",
+      "request": {
+        "operationId": "createAccountRun",
+        "method": "POST",
+        "pathTemplate": "/accounts/{accountId}/runs",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "a1d60670-123c-4cfe-a0fc-c547399d67b8"
+        },
+        "body": {
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "like_posts"
+          ]
+        }
+      },
+      "status": 422,
+      "response": {
+        "error": {
+          "code": "CAPABILITY_UNAVAILABLE",
+          "message": "所选任务尚未开放执行",
+          "retryable": false
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-partially-succeeded",
+      "description": "独立历史场景：两个社区中一个完成，一个失败；不表示当前未适配社区已可执行",
+      "request": {
+        "operationId": "getRun",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "partially_succeeded",
+          "communityIds": [
+            2,
+            6
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": null,
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "succeeded",
+              "message": "已确认签到完成，奖励到账",
+              "rewardPoints": 30,
+              "upstreamRetcode": 0,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": "2026-10-23T12:00:05Z"
+            },
+            {
+              "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+              "communityId": 6,
+              "taskKind": "community_sign",
+              "state": "failed",
+              "message": "上游服务暂不可用",
+              "rewardPoints": null,
+              "upstreamRetcode": -1,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": "2026-10-23T12:00:05Z"
+            }
+          ],
+          "confirmedRewardPoints": 30,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": "2026-10-23T12:00:00Z",
+          "finishedAt": "2026-10-23T12:00:05Z",
+          "error": {
+            "code": "UPSTREAM_ERROR",
+            "message": "部分步骤失败",
+            "retryable": true
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-failed",
+      "description": "无步骤完成的终态",
+      "request": {
+        "operationId": "getRun",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "source": "manual",
+          "parentRunId": null,
+          "businessDate": "2026-10-23",
+          "state": "failed",
+          "communityIds": [
+            2
+          ],
+          "taskKinds": [
+            "community_sign"
+          ],
+          "challengeId": null,
+          "steps": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "communityId": 2,
+              "taskKind": "community_sign",
+              "state": "failed",
+              "message": "根凭据已失效",
+              "rewardPoints": null,
+              "upstreamRetcode": null,
+              "startedAt": "2026-10-23T12:00:00Z",
+              "finishedAt": "2026-10-23T12:00:05Z"
+            }
+          ],
+          "confirmedRewardPoints": 0,
+          "cancelRequestedAt": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "startedAt": "2026-10-23T12:00:00Z",
+          "finishedAt": "2026-10-23T12:00:05Z",
+          "error": {
+            "code": "ACCOUNT_REAUTH_REQUIRED",
+            "message": "请重新登录该米游社账号",
+            "retryable": false
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "run-events",
+      "description": "步骤日志为纯文本并已脱敏",
+      "request": {
+        "operationId": "listRunEvents",
+        "method": "GET",
+        "pathTemplate": "/runs/{runId}/events",
+        "pathParams": {
+          "runId": "44444444-4444-4444-8444-444444444444"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "items": [
+            {
+              "id": "99999999-9999-4999-8999-999999999999",
+              "runId": "44444444-4444-4444-8444-444444444444",
+              "level": "info",
+              "message": "已核对签到奖励到账",
+              "stepId": "55555555-5555-4555-8555-555555555555",
+              "createdAt": "2026-10-23T12:00:00Z"
+            }
+          ],
+          "page": {
+            "nextCursor": null,
+            "hasMore": false
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "credential-awaiting-verification",
+      "description": "凭据操作也可以暂停等待人工验证",
+      "request": {
+        "operationId": "getCredentialOperation",
+        "method": "GET",
+        "pathTemplate": "/credential-operations/{operationId}",
+        "pathParams": {
+          "operationId": "66666666-6666-4666-8666-666666666666"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "66666666-6666-4666-8666-666666666666",
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "kind": "refresh_cookie",
+          "state": "awaiting_verification",
+          "challengeId": "33333333-3333-4333-8333-333333333333",
+          "account": {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "uid": "100000001",
+            "nickname": "演示账号",
+            "phoneMasked": "139****0000",
+            "remark": "虚构数据，仅供前端开发",
+            "enabled": true,
+            "status": "verification_required",
+            "communityIds": [
+              2
+            ],
+            "taskKinds": [
+              "community_sign"
+            ],
+            "autoRefresh": true,
+            "credential": {
+              "status": "verification_required",
+              "lastCheckedAt": "2026-10-23T12:00:00Z",
+              "lastCookieIssuedAt": "2026-10-23T12:00:00Z",
+              "cookieStorageExpiresAt": "2026-10-25T12:00:00Z",
+              "rootExpiresAt": null,
+              "expirySource": "cookie_max_age"
+            },
+            "version": 1,
+            "createdAt": "2026-10-23T12:00:00Z",
+            "updatedAt": "2026-10-23T12:00:00Z",
+            "activeCredentialOperationId": "66666666-6666-4666-8666-666666666666",
+            "activeRunId": null
+          },
+          "error": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "challenge-credential-operation",
+      "description": "统一组件处理凭据操作验证",
+      "request": {
+        "operationId": "getChallenge",
+        "method": "GET",
+        "pathTemplate": "/challenges/{challengeId}",
+        "pathParams": {
+          "challengeId": "33333333-3333-4333-8333-333333333333"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "ownerType": "credential_operation",
+          "ownerId": "66666666-6666-4666-8666-666666666666",
+          "purpose": "credential_refresh",
+          "provider": "geetest",
+          "version": "gt4",
+          "state": "pending",
+          "expiresAt": "2026-10-23T12:05:00Z",
+          "config": {
+            "captchaId": "mock-not-a-real-captcha-id",
+            "challenge": null,
+            "newCaptcha": null,
+            "offline": false,
+            "product": "bind",
+            "language": "zho",
+            "riskType": "slide",
+            "userInfo": null
+          }
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "notification-test-queued",
+      "description": "发送测试邮件不立即显示成功",
+      "request": {
+        "operationId": "createNotificationTest",
+        "method": "POST",
+        "pathTemplate": "/notifications/tests",
+        "pathParams": {},
+        "headers": {
+          "X-CSRF-Token": "mock-only-csrf-token",
+          "Idempotency-Key": "a36586fa-cde9-4a4b-93a5-7eb6fb197fdc"
+        }
+      },
+      "status": 202,
+      "response": {
+        "data": {
+          "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "state": "queued",
+          "error": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "notification-test-completed",
+      "description": "后台确认发送完成",
+      "request": {
+        "operationId": "getNotificationTest",
+        "method": "GET",
+        "pathTemplate": "/notifications/tests/{testId}",
+        "pathParams": {
+          "testId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "state": "succeeded",
+          "error": null,
+          "createdAt": "2026-10-23T12:00:00Z",
+          "updatedAt": "2026-10-23T12:00:00Z"
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    },
+    {
+      "id": "game-roles-ready",
+      "description": "虚构的签到福利游戏角色列表",
+      "request": {
+        "operationId": "getGameRoles",
+        "method": "GET",
+        "pathTemplate": "/accounts/{accountId}/game-roles",
+        "pathParams": {
+          "accountId": "11111111-1111-4111-8111-111111111111"
+        },
+        "headers": {}
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "accountId": "11111111-1111-4111-8111-111111111111",
+          "fetchedAt": "2026-10-23T12:00:00Z",
+          "stale": false,
+          "roles": [
+            {
+              "id": "game_synthetic_0",
+              "gameBiz": "hk4e_cn",
+              "gameName": "原神",
+              "uid": "100000010",
+              "region": "cn_gf01",
+              "regionName": "天空岛",
+              "nickname": "演示角色1",
+              "level": 60,
+              "communityId": 2,
+              "executable": true,
+              "blockedReason": null,
+              "status": "not_signed",
+              "totalSignDays": 4,
+              "reward": {
+                "name": "甜甜花酿鸡",
+                "count": 3,
+                "icon": null
+              },
+              "lastCheckedAt": "2026-10-23T12:00:00Z"
+            },
+            {
+              "id": "game_synthetic_1",
+              "gameBiz": "hkrpg_cn",
+              "gameName": "崩坏：星穹铁道",
+              "uid": "100000011",
+              "region": "prod_gf_cn",
+              "regionName": "星穹列车",
+              "nickname": "演示角色2",
+              "level": 60,
+              "communityId": 6,
+              "executable": true,
+              "blockedReason": null,
+              "status": "not_signed",
+              "totalSignDays": 4,
+              "reward": {
+                "name": "罐装快乐水",
+                "count": 3,
+                "icon": null
+              },
+              "lastCheckedAt": "2026-10-23T12:00:00Z"
+            },
+            {
+              "id": "game_synthetic_2",
+              "gameBiz": "nap_cn",
+              "gameName": "绝区零",
+              "uid": "100000012",
+              "region": "prod_gf_cn",
+              "regionName": "新艾利都",
+              "nickname": "演示角色3",
+              "level": 60,
+              "communityId": 8,
+              "executable": true,
+              "blockedReason": null,
+              "status": "not_signed",
+              "totalSignDays": 4,
+              "reward": {
+                "name": "正式调查员记录",
+                "count": 3,
+                "icon": null
+              },
+              "lastCheckedAt": "2026-10-23T12:00:00Z"
+            }
+          ]
+        },
+        "requestId": "77777777-7777-4777-8777-777777777777"
+      }
+    }
+  ]
+}

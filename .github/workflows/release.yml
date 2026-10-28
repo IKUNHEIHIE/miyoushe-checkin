@@ -1,0 +1,61 @@
+name: Build release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.12.0'
+      - run: npm ci && npm run build && npm test -- --testTimeout=15000
+        working-directory: frontend
+      - run: npm ci && npm run build && npm test && npm prune --omit=dev
+        working-directory: backend
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9.-]+)?$ ]]
+          mkdir -p release/backend release/docs release/frontend release/node
+          cp -a backend/dist backend/node_modules backend/package.json release/backend/
+          cp docs/openapi.json release/docs/
+          cp -a frontend/dist/. release/frontend/
+          cp deploy/gateway.mjs release/
+          nodefile="node-v24.12.0-linux-${{ matrix.arch }}.tar.xz"
+          curl -fsSLO "https://nodejs.org/dist/v24.12.0/$nodefile"
+          curl -fsSLO https://nodejs.org/dist/v24.12.0/SHASUMS256.txt
+          grep "  $nodefile$" SHASUMS256.txt | sha256sum -c -
+          tar -xJf "$nodefile" --strip-components=1 -C release/node
+          name="miyoushe-${tag}-linux-${{ matrix.arch }}.tar.gz"
+          tar -czf "$name" -C release .
+          sha256sum "$name" > "$name.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.arch }}
+          path: |
+            miyoushe-*.tar.gz
+            miyoushe-*.sha256
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" assets/* deploy/install.sh --title "$GITHUB_REF_NAME" --generate-notes
