@@ -2,6 +2,7 @@
   "name": "miyoushe-backend",
   "version": "0.2.0",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=24.12.0"
