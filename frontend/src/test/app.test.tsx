@@ -103,6 +103,7 @@ describe('米游社自托管签到面板 前端关键交互与契约测试', () 
 
     const renewBtn = await screen.findByRole('button', { name: /更新验证会话/i });
     await user.click(renewBtn);
+    await screen.findByText('已更新验证会话');
 
     // 更新会话后手动完成验证并提交有效结果
     setCaptchaRejection(false);
@@ -247,6 +248,7 @@ describe('米游社自托管签到面板 前端关键交互与契约测试', () 
 
     // 3) 发送测试邮件并轮询至 succeeded
     const testBtn = screen.getByRole('button', { name: /向已保存收件地址发送测试邮件/i });
+    await waitFor(() => expect(testBtn).toBeEnabled());
     await user.click(testBtn);
 
     await waitFor(() => {
